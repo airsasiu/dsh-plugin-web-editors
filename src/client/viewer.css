@@ -257,6 +257,144 @@
   color: #1a56db;
 }
 
+.dsh-we-open-btn {
+  flex-basis: auto;
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dsh-we-open-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.dsh-we-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(15, 17, 23, 0.32);
+  padding: 14px;
+}
+
+.dsh-we-picker {
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--dsw-border, #d5d8de);
+  border-radius: 8px;
+  background: var(--dsw-bg, #ffffff);
+  color: var(--dsw-fg, #1f2329);
+  box-shadow: -12px 0 32px rgba(15, 17, 23, 0.24);
+}
+
+.dsh-we-picker-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 10px;
+  border-bottom: 1px solid var(--dsw-border, #d5d8de);
+  background: var(--dsw-bg-subtle, #f7f8fa);
+}
+
+.dsh-we-picker-header input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-border, #c9cdd4);
+  border-radius: 6px;
+  background: var(--dsw-bg, #ffffff);
+  color: inherit;
+  font-size: 13px;
+}
+
+.dsh-we-picker-header input:focus {
+  outline: 2px solid #3b6ef6;
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+.dsh-we-picker-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dsh-we-picker-note,
+.dsh-we-picker-error {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.dsh-we-picker-note {
+  color: var(--dsw-fg-muted, #8a919c);
+}
+
+.dsh-we-picker-error {
+  color: #c0392b;
+}
+
+.dsh-we-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+}
+
+.dsh-we-picker-list li {
+  min-width: 0;
+}
+
+.dsh-we-picker-list button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dsh-we-picker-list button:hover,
+.dsh-we-picker-list button:focus-visible {
+  background: var(--dsw-bg-hover, #eef0f3);
+}
+
+.dsh-we-picker-name,
+.dsh-we-picker-path {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsh-we-picker-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dsh-we-picker-path {
+  color: var(--dsw-fg-muted, #6b7280);
+  font-size: 12px;
+}
+
 /* Match the SpreadJS Designer dark palette so the container chrome and the
    editor stay coherent when the OS uses a dark color scheme. */
 @media (prefers-color-scheme: dark) {
@@ -341,6 +479,44 @@
     background: #2748b8;
     border-color: #3b6ef6;
     color: #ffffff;
+  }
+
+  .dsh-we-picker-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .dsh-we-picker {
+    background: #1e2227;
+    color: #e8eaed;
+    border-color: #343a42;
+    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.55);
+  }
+
+  .dsh-we-picker-header {
+    background: #171a1f;
+    border-bottom-color: #343a42;
+  }
+
+  .dsh-we-picker-header input {
+    background: #262b32;
+    border-color: #3a414a;
+  }
+
+  .dsh-we-picker-list button:hover,
+  .dsh-we-picker-list button:focus-visible {
+    background: #2c3138;
+  }
+
+  .dsh-we-picker-note {
+    color: #a3aab3;
+  }
+
+  .dsh-we-picker-error {
+    color: #f0a0a0;
+  }
+
+  .dsh-we-picker-path {
+    color: #a3aab3;
   }
 }
 

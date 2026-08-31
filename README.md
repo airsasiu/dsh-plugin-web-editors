@@ -8,6 +8,7 @@ It provides:
 
 - `webFileEditors`, the client service used by editor plugins and the editor panel.
 - A full-height right panel through `shell.overlay`, with a resizable drag handle.
+- A file picker that scans the workspace root and lists only extensions owned by a registered editor, so users can open existing files without waiting for a chat-produced file link.
 - A `conversation.chat.turnTail` row for produced files whose extension has a registered editor. Unsupported produced files still use the chat-provided `openFile`, so the official deliverables behavior is preserved.
 
 The generic framework contains no SpreadJS/GrapeCity code. Editor plugins (for example `dsh-plugin-spreadjs-editor`) register their own components through `webFileEditors`.
@@ -48,6 +49,7 @@ interface WebFileEditors {
 
 | Surface | Entry | Purpose |
 | --- | --- | --- |
+| Host route | `/web-editors/api/list` | Workspace file scan for the panel picker |
 | Client service | `webFileEditors` | Editor registry and panel opener |
 | Slot | `shell.overlay`, id `web-editors.dock` | Default docked right panel, order 110 |
 | Slot | `shell.editor` | Optional native right panel when a future shell declares it |
@@ -104,6 +106,7 @@ No DSH core change is required. The editor panel registers into `shell.overlay` 
 
 - A left-edge drag handle, desktop range 720-1100px, clamped to narrow viewports.
 - Keyboard resizing with `Arrow Left`/`Arrow Right` and `Home`/`End`.
+- An `Open file` picker that scans the current root (or the process cwd when no root is known), skips `.git` and `node_modules`, and filters to the extensions registered by installed editors.
 - A width kept in the panel store across file switches.
 
 `webFileEditors` and the produced-file row are provided by this package, so editor plugins do not need to know whether the panel is an overlay or a future native shell slot.

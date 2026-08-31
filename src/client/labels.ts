@@ -7,6 +7,11 @@ export interface EditorLabels {
   dockTitle: string
   closeDock: string
   resizeDock: string
+  openFile: string
+  searchFiles: string
+  closeFilePicker: string
+  noFiles: string
+  loadingFiles: string
   files: string
   empty: string
   noEditor: string
@@ -19,6 +24,11 @@ const EN: EditorLabels = {
   dockTitle: 'Files',
   closeDock: 'Close file panel',
   resizeDock: 'Resize file panel',
+  openFile: 'Open file',
+  searchFiles: 'Search files',
+  closeFilePicker: 'Close file picker',
+  noFiles: 'No supported files found',
+  loadingFiles: 'Loading files…',
   files: 'Open files',
   empty: 'No open file',
   noEditor: 'No editor registered for this file',
@@ -31,6 +41,11 @@ const ZH: EditorLabels = {
   dockTitle: '文件',
   closeDock: '关闭文件面板',
   resizeDock: '调整文件面板宽度',
+  openFile: '打开文件',
+  searchFiles: '搜索文件',
+  closeFilePicker: '关闭文件选择器',
+  noFiles: '未找到支持的文件',
+  loadingFiles: '正在加载文件…',
   files: '已打开文件',
   empty: '暂无打开文件',
   noEditor: '未注册此文件类型的编辑器',

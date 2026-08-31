@@ -73,6 +73,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     pendingOpens.length = 0
     return {
       resolveEditor: (path: string) => registry.find(path),
+      supportedExtensions: () => registry.extensions(),
       labels,
       mode,
       isNativeActive: () => nativeActive,

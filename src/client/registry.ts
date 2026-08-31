@@ -8,6 +8,7 @@ export interface EditorRegistry {
   readonly size: number
   register(editor: WebFileEditor): () => void
   find(path: string): WebFileEditor | undefined
+  extensions(): string[]
 }
 
 /**
@@ -95,11 +96,16 @@ export function createEditorRegistry(): EditorRegistry {
     return id === undefined ? undefined : byId.get(id)
   }
 
+  function extensions(): string[] {
+    return [...extensionToId.keys()]
+  }
+
   return {
     get size() {
       return byId.size
     },
     register,
     find,
+    extensions,
   }
 }

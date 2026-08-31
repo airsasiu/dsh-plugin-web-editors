@@ -4,8 +4,13 @@
  * overlay entry renders nothing once the native column is active.
  */
 import type { InjectFace, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { WebFileEditor } from './contract.ts'
+import {
+  buildFileListUrl,
+  filterFileEntries,
+  type WebFileEntry,
+} from './files.ts'
 import type { EditorLabels } from './labels.ts'
 import { basename } from './registry.ts'
 import {
@@ -19,6 +24,7 @@ import type { EditorPanelStoreHandle } from './store.ts'
 /** Registration-side callbacks shared with the panel component. */
 export interface EditorPanelInjected {
   resolveEditor(path: string): WebFileEditor | undefined
+  supportedExtensions(): readonly string[]
   labels: EditorLabels
   mode: 'native' | 'overlay'
   isNativeActive(): boolean
@@ -33,6 +39,7 @@ export function EditorPanel({
   useStore,
   actions,
   resolveEditor,
+  supportedExtensions,
   labels,
   mode,
   isNativeActive,
@@ -47,6 +54,33 @@ export function EditorPanel({
   const editorRevision = useStore(state => state.editorRevision)
   const overlayWidth = useStore(state => state.overlayWidth)
   const [resizing, setResizing] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerQuery, setPickerQuery] = useState('')
+  const [pickerEntries, setPickerEntries] = useState<WebFileEntry[]>([])
+  const [pickerLoading, setPickerLoading] = useState(false)
+  const [pickerError, setPickerError] = useState('')
+
+  useEffect(() => {
+    if (!pickerOpen || supportedExtensions().length === 0) return
+    let alive = true
+    setPickerLoading(true)
+    setPickerError('')
+    void fetch(buildFileListUrl(activeRoot, supportedExtensions()))
+      .then(async response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data = await response.json() as { files?: WebFileEntry[] }
+        if (alive) setPickerEntries(data.files ?? [])
+      })
+      .catch(error => {
+        if (alive) setPickerError(error instanceof Error ? error.message : String(error))
+      })
+      .finally(() => {
+        if (alive) setPickerLoading(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [activeRoot, pickerOpen, supportedExtensions])
 
   const applyWidthFromPointer = useCallback((clientX: number): void => {
     if (typeof window === 'undefined') return
@@ -101,6 +135,23 @@ export function EditorPanel({
     if (files.length <= 1) onClose?.()
   }
 
+  const openPicker = (): void => {
+    setPickerQuery('')
+    setPickerEntries([])
+    setPickerError('')
+    setPickerOpen(true)
+  }
+
+  const closePicker = (): void => setPickerOpen(false)
+
+  const pickFile = (file: WebFileEntry): void => {
+    actions.open(file.path, activeRoot)
+    setPickerOpen(false)
+  }
+
+  const hasSupportedExtensions = supportedExtensions().length > 0
+  const pickedFiles = filterFileEntries(pickerEntries, pickerQuery)
+
   const overlayStyle = mode === 'overlay'
     ? ({ '--dsh-we-width': `${overlayWidth}px` } as React.CSSProperties)
     : undefined
@@ -136,6 +187,16 @@ export function EditorPanel({
         <div className="dsh-we-title-wrap">
           <span className="dsh-we-title" title={active?.path}>{active === undefined ? labels.dockTitle : basename(active.path)}</span>
         </div>
+        <button
+          type="button"
+          className="dsh-we-icon-btn dsh-we-open-btn"
+          aria-label={labels.openFile}
+          title={labels.openFile}
+          disabled={!hasSupportedExtensions}
+          onClick={openPicker}
+        >
+          {labels.openFile}
+        </button>
         <button
           type="button"
           className="dsh-we-icon-btn"
@@ -178,6 +239,65 @@ export function EditorPanel({
       </div>
       {status !== '' && (
         <footer className={`dsh-we-status dsh-we-status-${statusTone}`}>{status}</footer>
+      )}
+      {pickerOpen && (
+        <div
+          className="dsh-we-picker-backdrop"
+          onMouseDown={event => {
+            if (event.target === event.currentTarget) closePicker()
+          }}
+        >
+          <section
+            className="dsh-we-picker"
+            role="dialog"
+            aria-modal="true"
+            aria-label={labels.openFile}
+          >
+            <header className="dsh-we-picker-header">
+              <input
+                type="search"
+                autoFocus
+                value={pickerQuery}
+                placeholder={labels.searchFiles}
+                aria-label={labels.searchFiles}
+                onChange={event => setPickerQuery(event.target.value)}
+              />
+              <button
+                type="button"
+                className="dsh-we-icon-btn"
+                aria-label={labels.closeFilePicker}
+                title={labels.closeFilePicker}
+                onClick={closePicker}
+              >
+                ×
+              </button>
+            </header>
+            <div className="dsh-we-picker-body">
+              {pickerLoading
+                ? <p className="dsh-we-picker-note">{labels.loadingFiles}</p>
+                : pickerError !== ''
+                  ? <p className="dsh-we-picker-error">{pickerError}</p>
+                  : pickedFiles.length === 0
+                    ? <p className="dsh-we-picker-note">{labels.noFiles}</p>
+                    : (
+                      <ul className="dsh-we-picker-list">
+                        {pickedFiles.map(file => (
+                          <li key={file.path}>
+                            <button
+                              type="button"
+                              title={file.path}
+                              onClick={() => pickFile(file)}
+                            >
+                              <span className="dsh-we-picker-name">{file.name}</span>
+                              <span className="dsh-we-picker-path">{file.rel}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+            </div>
+          </section>
+        </div>
       )}
     </aside>
   )

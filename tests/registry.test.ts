@@ -93,4 +93,15 @@ describe('editor registry', () => {
     disposer()
     assert.equal(registry.size, 0)
   })
+
+  it('enumerates the normalized claimed extensions', () => {
+    const registry = createEditorRegistry()
+    registry.register(editor('sheet', ['xlsx', '.CSV']))
+    registry.register(editor('json', ['json']))
+    assert.deepEqual(new Set(registry.extensions()), new Set(['.xlsx', '.csv', '.json']))
+    const disposer = registry.register(editor('sheet', ['xlsx', 'sjs']))
+    assert.deepEqual(new Set(registry.extensions()), new Set(['.xlsx', '.sjs', '.json']))
+    disposer()
+    assert.deepEqual(new Set(registry.extensions()), new Set(['.json']))
+  })
 })
