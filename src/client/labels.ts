@@ -18,6 +18,7 @@ export interface EditorLabels {
   produced: string
   openInEditor: string
   openWithNative: string
+  openFailed: string
 }
 
 const EN: EditorLabels = {
@@ -35,6 +36,7 @@ const EN: EditorLabels = {
   produced: 'Produced',
   openInEditor: 'Open {name} in editor',
   openWithNative: 'Open {name}',
+  openFailed: 'Open failed: {name}',
 }
 
 const ZH: EditorLabels = {
@@ -52,6 +54,7 @@ const ZH: EditorLabels = {
   produced: '产物',
   openInEditor: '在编辑器中打开 {name}',
   openWithNative: '打开 {name}',
+  openFailed: '打开失败：{name}',
 }
 
 /** Pick the zh labels for any zh* locale, English otherwise. */

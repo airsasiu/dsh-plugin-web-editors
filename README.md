@@ -57,7 +57,7 @@ interface WebFileEditors {
 | Slot | `conversation.session.header.actions`, id `web-editors.open` | Session-header trigger that opens panel and picker |
 | Slot | `conversation.chat.turnTail`, priority -10 | Produced-file row for editor-supported files |
 
-The turn-tail selector reads the official deliverables turn data (`owner.turn.data.get('deliverables')`, shape `{ produced: Array<{ seq, path }> }`) when available and declines otherwise. It claims a turn only when at least one produced file has a registered editor. When it claims a turn, it renders every produced file: supported chips open the editor panel, unsupported chips call the chat-provided `openFile`.
+The turn-tail selector reads the official deliverables turn data (`owner.turn.data.get('deliverables')`, shape `{ produced: Array<{ seq, path }> }`) when available and declines otherwise. It claims a turn only when at least one produced file has a registered editor. When it claims a turn, it renders every produced file: supported chips open the editor panel, unsupported chips call the chat-provided `openFile`. If the native opener rejects (for example a produced file was deleted), the row shows an inline failure instead of surfacing the raw host error.
 
 ## Configuration
 

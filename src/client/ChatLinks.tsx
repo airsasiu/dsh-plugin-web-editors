@@ -5,9 +5,11 @@
  */
 import type { TurnTailOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { InjectFace } from '@deepseek-ai/dsh-client-ui-slots'
+import { useState } from 'react'
 import type { ChatFileMatch } from './contract.ts'
 import type { EditorLabels } from './labels.ts'
 import { interpolate } from './labels.ts'
+import { openNativeFile } from './open-native.ts'
 import { basename } from './registry.ts'
 
 /** Registration-side callbacks shared with the turn-tail row. */
@@ -27,6 +29,13 @@ export function ChatLinks({
   labels,
 }: ChatLinksProps): React.JSX.Element {
   const supported = new Set(matched.supported.map(file => file.path))
+  const [failedPath, setFailedPath] = useState<string | null>(null)
+
+  const openWithNative = (path: string): void => {
+    setFailedPath(null)
+    openNativeFile(path, openFile, setFailedPath)
+  }
+
   return (
     <div className="dsh-we-chat" data-web-editors-chat>
       <span className="dsh-we-chat-label">{labels.produced}</span>
@@ -43,7 +52,7 @@ export function ChatLinks({
               aria-label={interpolate(inEditor ? labels.openInEditor : labels.openWithNative, name)}
               onClick={() => {
                 if (inEditor) openEditor(file.path)
-                else openFile(file.path)
+                else openWithNative(file.path)
               }}
             >
               {name}
@@ -51,6 +60,11 @@ export function ChatLinks({
           )
         })}
       </div>
+      {failedPath !== null && (
+        <span className="dsh-we-chat-error">
+          {interpolate(labels.openFailed, basename(failedPath))}
+        </span>
+      )}
     </div>
   )
 }

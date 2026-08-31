@@ -228,6 +228,16 @@
   overflow-x: auto;
 }
 
+.dsh-we-chat-error {
+  flex: 1 0 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c0392b;
+  font-size: 12px;
+}
+
 .dsh-we-chat-file {
   appearance: none;
   display: inline-flex;
@@ -500,6 +510,10 @@
     background: #2748b8;
     border-color: #3b6ef6;
     color: #ffffff;
+  }
+
+  .dsh-we-chat-error {
+    color: #f0a0a0;
   }
 
   .dsh-we-open-btn:disabled {

@@ -57,7 +57,7 @@ interface WebFileEditors {
 | Slot | `conversation.session.header.actions`, id `web-editors.open` | 会话标题栏入口，直接打开面板和选择器 |
 | Slot | `conversation.chat.turnTail`, priority -10 | editor 支持文件的 produced-file 行 |
 
-turn-tail selector 读取官方 deliverables 数据（`owner.turn.data.get('deliverables')`，结构为 `{ produced: Array<{ seq, path }> }`），没有数据时直接放弃。只有至少一个 produced file 有已注册 editor 时才 claim turn；claim 后会渲染所有 produced file：支持的文件 chip 打开 editor 面板，不支持的 chip 调用 chat 提供的 `openFile`。
+turn-tail selector 读取官方 deliverables 数据（`owner.turn.data.get('deliverables')`，结构为 `{ produced: Array<{ seq, path }> }`），没有数据时直接放弃。只有至少一个 produced file 有已注册 editor 时才 claim turn；claim 后会渲染所有 produced file：支持的文件 chip 打开 editor 面板，不支持的 chip 调用 chat 提供的 `openFile`。如果原生 opener 失败（例如 produced file 已被删除），行内会显示失败提示，不再把原始 host 错误抛到会话里。
 
 ## 配置
 
