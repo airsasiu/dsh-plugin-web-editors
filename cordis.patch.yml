@@ -1,0 +1,11 @@
+# dsh-plugin-web-editors bundle patch
+#
+# One row activates the whole plugin: the Loader imports the package's minimal
+# node half (lib/index.js) and the client-modules scan picks up the dsh.client
+# declaration for the browser half (lib/client.js, the webFileEditors service,
+# the shell.overlay dock, and the conversation.chat.turnTail row).
+
+- insert:
+    - id: web-editors
+      name: dsh-plugin-web-editors
+      config: {}
