@@ -2,12 +2,12 @@
 
 [English README](README.md)
 
-一个面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI 的通用插件，把注册的文件编辑器整合成一个右侧 editor 面板。
+一个纯插件式的 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI 包，把注册的文件编辑器整合成右侧停靠的 editor 面板。它可以直接挂在未修改的 DSH Web profile 上，不依赖 DSH core fork、PR 分支或 patch 安装。
 
-本包是纯插件，可以安全挂载在未修改的 DSH Web profile 上。当 shell 还没有声明原生 `shell.editor` slot 时，它使用 `shell.overlay` 作为右侧停靠面板兜底。它提供：
+它提供：
 
-- `webFileEditors`：DSH core 在回退到原生 workspace opener 之前可以调用的客户端服务。
-- 原生右侧面板：当 `shell.editor` 存在时注册进去；旧 shell 使用 `shell.overlay` 停靠面板。
+- `webFileEditors`：editor 插件和 editor 面板使用的客户端服务。
+- 通过 `shell.overlay` 渲染的全高右侧面板，带可拖拽宽度 handle。
 - `conversation.chat.turnTail` 行：为扩展名已注册 editor 的 produced files 显示文件入口。未支持的文件仍调用 chat 提供的 `openFile`，保留官方 deliverables 行为。
 
 通用框架不包含任何 SpreadJS/GrapeCity 代码。具体编辑器插件（例如 `dsh-plugin-spreadjs-editor`）通过 `webFileEditors` 注册自己的组件。
@@ -49,8 +49,8 @@ interface WebFileEditors {
 | Surface | Entry | 作用 |
 | --- | --- | --- |
 | 客户端服务 | `webFileEditors` | editor 注册表与面板打开器 |
-| Slot | `shell.editor` | shell 声明时注册原生右侧面板 |
-| Slot | `shell.overlay`, id `web-editors.dock` | 右侧停靠面板兜底，order 110 |
+| Slot | `shell.overlay`, id `web-editors.dock` | 默认右侧停靠面板，order 110 |
+| Slot | `shell.editor` | 未来 shell 声明时的可选原生右侧面板 |
 | Slot | `conversation.chat.turnTail`, priority -10 | editor 支持文件的 produced-file 行 |
 
 turn-tail selector 读取官方 deliverables 数据（`owner.turn.data.get('deliverables')`，结构为 `{ produced: Array<{ seq, path }> }`），没有数据时直接放弃。只有至少一个 produced file 有已注册 editor 时才 claim turn；claim 后会渲染所有 produced file：支持的文件 chip 打开 editor 面板，不支持的 chip 调用 chat 提供的 `openFile`。
@@ -69,7 +69,7 @@ bundle row 接受一个客户端选项，可在 profile 的 `cordis.patch.yml` �
     preferOverlay: true
 ```
 
-默认 `auto` 行为是：可用时注册进 `shell.editor`，否则回退到 overlay 停靠面板。
+默认行为是：DSH shell 声明 `shell.editor` 时使用它，否则回退到 overlay 停靠面板。
 
 ## 安装
 
@@ -96,25 +96,19 @@ npm test            # Node built-in runner（type stripping，不创建子进程
 npm run build       # tsdown -> lib/index.js + lib/client.js
 ```
 
-测试脚本使用 Node 内置 test runner 的 `--test-isolation=none` 和
-`--experimental-strip-types`；不使用 Vitest，因为其 worker/Vite 子进程会被 DSH Windows 文件沙箱拦截。
+测试脚本使用 Node 内置 test runner 的 `--test-isolation=none` 和 `--experimental-strip-types`；不使用 Vitest，因为其 worker/Vite 子进程会被 DSH Windows 文件沙箱拦截。
 
-## 原生面板与兼容兜底
+## Plugin-only 部署
 
-当运行中的 shell 声明了 `shell.editor` 时，本包把 editor 面板注册到原生右侧栏，并在文件打开时调用 `ctx.layout.openEditor()`。该模式下面板是真正可拖拽的 grid 列。
+不需要任何 DSH core 改动。editor 面板通过 `shell.overlay` 注册为全高右侧停靠栏，并提供：
 
-当 `shell.editor` 不存在时，同一面板注册到 `shell.overlay`，作为全高右侧停靠栏。服务契约和 `webFileEditors` 名称是 DSH core 调用的扩展缝，因此 editor 插件不需要关心当前处于哪种模式。
+- 左边缘拖拽 handle，桌面宽度 720-1100px，窄视口自动收窄。
+- `方向键左/右` 和 `Home`/`End` 键盘调整。
+- 宽度保存在面板 store 中，切换文件后保持不变。
 
-已知限制：兼容模式下面板是 overlay，不是原生 grid 列。它带有左侧拖拽 handle（720-1100px，窄视口下自动收窄），并支持 `方向键左/右` 和 `Home`/`End` 键盘调整；原生 `shell.editor` 路径可以在不改 editor API 的情况下消除该结构限制。
+`webFileEditors` 和 produced-file 行都由本包提供，因此 editor 插件不需要关心面板是 overlay 还是未来某个原生 shell slot。
 
-## DeepSeek Harness core 扩展点
-
-本包自己提供 `webFileEditors` 服务和面板，因此在未修改的 shell 上，停靠面板和 produced-file chips 也可以工作。另外两个 core 扩展点能改善集成，已在 DSH fork 的 `feat/web-editor-extension-points` 分支中准备：
-
-- `shell.editor`：原生 single/root 右栏，替代 overlay 停靠。
-- `openFile -> webFileEditors.tryOpen()` fallback：DSH 自己的 chat 文件链接会先尝试打开已注册 editor，再回退到原生 workspace opener。
-
-在把这些改动 upstream 或应用 patch 之前，面板仍可工作，但 DSH 原生文件链接（例如 core produced-file 行）不会自动走 `webFileEditors`。
+如果未来 DSH 发布版声明 `shell.editor`，本包可以注册进该原生右侧栏，并在文件打开时调用 `ctx.layout.openEditor()`。本项目不随包分发 shell 改动，只在运行中的 shell 提供该 slot 时消费它。
 
 ## License
 

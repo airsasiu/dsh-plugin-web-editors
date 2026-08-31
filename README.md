@@ -2,14 +2,12 @@
 
 [中文 README](README.zh-CN.md)
 
-A generic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI plugin that turns registered file editors into a single docked editor panel.
+A plugin-only [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI package that turns registered file editors into a docked right-side editor panel. It works on a stock DSH Web profile without a DSH core fork, PR branch, or patched installation.
 
-The package is plugin-only and safe to mount on a stock DSH Web profile. It uses
-`shell.overlay` as a docked fallback when the shell does not declare the native
-`shell.editor` slot yet. It provides:
+It provides:
 
-- `webFileEditors`, the client service DSH core can call before falling back to the native workspace opener.
-- A native right-side panel registered into `shell.editor` when that slot exists, with a `shell.overlay` dock fallback for older shells.
+- `webFileEditors`, the client service used by editor plugins and the editor panel.
+- A full-height right panel through `shell.overlay`, with a resizable drag handle.
 - A `conversation.chat.turnTail` row for produced files whose extension has a registered editor. Unsupported produced files still use the chat-provided `openFile`, so the official deliverables behavior is preserved.
 
 The generic framework contains no SpreadJS/GrapeCity code. Editor plugins (for example `dsh-plugin-spreadjs-editor`) register their own components through `webFileEditors`.
@@ -51,20 +49,19 @@ interface WebFileEditors {
 | Surface | Entry | Purpose |
 | --- | --- | --- |
 | Client service | `webFileEditors` | Editor registry and panel opener |
-| Slot | `shell.editor` | Native right panel when the shell declares it |
-| Slot | `shell.overlay`, id `web-editors.dock` | Docked right-panel fallback, order 110 |
+| Slot | `shell.overlay`, id `web-editors.dock` | Default docked right panel, order 110 |
+| Slot | `shell.editor` | Optional native right panel when a future shell declares it |
 | Slot | `conversation.chat.turnTail`, priority -10 | Produced-file row for editor-supported files |
 
 The turn-tail selector reads the official deliverables turn data (`owner.turn.data.get('deliverables')`, shape `{ produced: Array<{ seq, path }> }`) when available and declines otherwise. It claims a turn only when at least one produced file has a registered editor. When it claims a turn, it renders every produced file: supported chips open the editor panel, unsupported chips call the chat-provided `openFile`.
 
 ## Configuration
 
-The bundle row accepts one client option, overridable in the profile's
-`cordis.patch.yml`:
+The bundle row accepts one client option, overridable in the profile's `cordis.patch.yml`:
 
 | Key | Default | Description |
 | --- | --- | --- |
-| `preferOverlay` | `false` | Force the plugin-only overlay dock even when the shell declares `shell.editor`. |
+| `preferOverlay` | `false` | Force the plugin-only overlay dock even when a shell declares `shell.editor`. |
 
 ```yaml
 - id: web-editors
@@ -72,8 +69,7 @@ The bundle row accepts one client option, overridable in the profile's
     preferOverlay: true
 ```
 
-The default `auto` behavior registers into `shell.editor` when available and
-falls back to the overlay dock otherwise.
+The default behavior uses `shell.editor` when a DSH shell declares it and falls back to the overlay dock otherwise.
 
 ## Install
 
@@ -100,36 +96,19 @@ npm test            # Node built-in runner (type stripping; no child-process spa
 npm run build       # tsdown -> lib/index.js + lib/client.js
 ```
 
-The test script uses Node's built-in test runner with `--test-isolation=none` and
-`--experimental-strip-types`; Vitest is not used because its worker/Vite child
-processes are blocked by the DSH Windows file sandbox.
+The test script uses Node's built-in test runner with `--test-isolation=none` and `--experimental-strip-types`; Vitest is not used because its worker/Vite child processes are blocked by the DSH Windows file sandbox.
 
-## Native panel and compatibility fallback
+## Plugin-only deployment
 
-When the running shell declares `shell.editor`, this package registers the editor panel into that native right column and calls `ctx.layout.openEditor()` when a file opens. The panel is a real resizable grid column in that mode.
+No DSH core change is required. The editor panel registers into `shell.overlay` as a full-height docked right column. In that mode it has:
 
-When `shell.editor` is absent, the same panel registers into `shell.overlay` as a full-height docked right column. The service contract and `webFileEditors` name are the extension seam DSH core calls, so editor plugins do not care which mode is active.
+- A left-edge drag handle, desktop range 720-1100px, clamped to narrow viewports.
+- Keyboard resizing with `Arrow Left`/`Arrow Right` and `Home`/`End`.
+- A width kept in the panel store across file switches.
 
-Known limitation: in compatibility mode the panel is a full-height overlay, not
-a native grid column. It has a left-edge drag handle (720-1100px, clamped to
-narrow viewports) and keyboard resizing with `Arrow Left`/`Arrow Right` and
-`Home`/`End`; the native `shell.editor` path removes the structural limitation
-without changing the editor API.
+`webFileEditors` and the produced-file row are provided by this package, so editor plugins do not need to know whether the panel is an overlay or a future native shell slot.
 
-## DeepSeek Harness core extension points
-
-This package provides the `webFileEditors` service and the panel itself, so the
-docked panel and produced-file chips work even on a stock shell. Two core
-extension points improve the integration and are prepared in the
-`feat/web-editor-extension-points` branch of the DSH fork:
-
-- `shell.editor` — a native single/root right column instead of the overlay dock.
-- `openFile` -> `webFileEditors.tryOpen()` fallback — DSH's own chat file links
-  open the registered editor before falling back to the native workspace opener.
-
-Until those changes are upstreamed or applied as a patch, the panel still works,
-but DSH-native file links (for example core-produced file rows) do not route
-through `webFileEditors` automatically.
+If a future DSH release declares `shell.editor`, this package can register into that native right column and call `ctx.layout.openEditor()` when a file opens. This project does not ship that shell change; it only consumes the slot when the running shell provides it.
 
 ## License
 

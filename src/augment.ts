@@ -2,7 +2,7 @@
  * Pull the harness packages' declaration merges into the TS program.
  *
  * The slots this plugin targets are declared by OTHER packages:
- *  - `shell.editor`               — new native slot from the patched ui-layout
+ *  - `shell.editor`               — optional native slot when a DSH shell declares it
  *  - `shell.overlay`              — @deepseek-ai/dsh-client-ui-layout (SlotMap)
  *  - `conversation.chat.turnTail` — @deepseek-ai/dsh-client-ui-conversation
  *    (SlotMap + TurnTailOwnerProps)
