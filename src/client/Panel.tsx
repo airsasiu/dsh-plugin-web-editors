@@ -4,9 +4,16 @@
  * overlay entry renders nothing once the native column is active.
  */
 import type { InjectFace, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
+import { useCallback, useState } from 'react'
 import type { WebFileEditor } from './contract.ts'
 import type { EditorLabels } from './labels.ts'
 import { basename } from './registry.ts'
+import {
+  clampOverlayWidth,
+  OVERLAY_KEYBOARD_STEP,
+  OVERLAY_WIDTH_MAX,
+  OVERLAY_WIDTH_MIN,
+} from './dock-size.ts'
 import type { EditorPanelStoreHandle } from './store.ts'
 
 /** Registration-side callbacks shared with the panel component. */
@@ -38,6 +45,45 @@ export function EditorPanel({
   const status = useStore(state => state.status)
   const statusTone = useStore(state => state.statusTone)
   const editorRevision = useStore(state => state.editorRevision)
+  const overlayWidth = useStore(state => state.overlayWidth)
+  const [resizing, setResizing] = useState(false)
+
+  const applyWidthFromPointer = useCallback((clientX: number): void => {
+    if (typeof window === 'undefined') return
+    actions.setOverlayWidth(clampOverlayWidth(window.innerWidth - clientX, window.innerWidth))
+  }, [actions])
+
+  const startResize = useCallback((event: React.PointerEvent<HTMLDivElement>): void => {
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    setResizing(true)
+  }, [])
+
+  const moveResize = useCallback((event: React.PointerEvent<HTMLDivElement>): void => {
+    if (!resizing) return
+    applyWidthFromPointer(event.clientX)
+  }, [applyWidthFromPointer, resizing])
+
+  const stopResize = useCallback((event: React.PointerEvent<HTMLDivElement>): void => {
+    if (!resizing) return
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    setResizing(false)
+  }, [resizing])
+
+  const resizeByKey = useCallback((event: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (typeof window === 'undefined') return
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault()
+      const step = event.key === 'ArrowLeft' ? OVERLAY_KEYBOARD_STEP : -OVERLAY_KEYBOARD_STEP
+      actions.setOverlayWidth(clampOverlayWidth(overlayWidth + step, window.innerWidth))
+      return
+    }
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault()
+      const target = event.key === 'Home' ? OVERLAY_WIDTH_MAX : OVERLAY_WIDTH_MIN
+      actions.setOverlayWidth(clampOverlayWidth(target, window.innerWidth))
+    }
+  }, [actions, overlayWidth])
 
   if (mode === 'overlay' && isNativeActive()) return null
   if (!open) return null
@@ -55,13 +101,37 @@ export function EditorPanel({
     if (files.length <= 1) onClose?.()
   }
 
+  const overlayStyle = mode === 'overlay'
+    ? ({ '--dsh-we-width': `${overlayWidth}px` } as React.CSSProperties)
+    : undefined
+
   return (
     <aside
       className="dsh-we-dock"
       data-web-editors-dock
       data-mode={mode}
       data-editor-revision={editorRevision}
+      style={overlayStyle}
     >
+      {mode === 'overlay' && (
+        <div
+          role="separator"
+          aria-label={labels.resizeDock}
+          aria-orientation="vertical"
+          aria-valuemax={OVERLAY_WIDTH_MAX}
+          aria-valuemin={OVERLAY_WIDTH_MIN}
+          aria-valuenow={overlayWidth}
+          tabIndex={0}
+          className="dsh-we-resize"
+          data-resizing={resizing || undefined}
+          onKeyDown={resizeByKey}
+          onLostPointerCapture={() => setResizing(false)}
+          onPointerCancel={stopResize}
+          onPointerDown={startResize}
+          onPointerMove={moveResize}
+          onPointerUp={stopResize}
+        />
+      )}
       <header className="dsh-we-header">
         <div className="dsh-we-title-wrap">
           <span className="dsh-we-title" title={active?.path}>{active === undefined ? labels.dockTitle : basename(active.path)}</span>

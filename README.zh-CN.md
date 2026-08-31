@@ -89,7 +89,7 @@ npm run build       # tsdown -> lib/index.js + lib/client.js
 
 当 `shell.editor` 不存在时，同一面板注册到 `shell.overlay`，作为全高右侧停靠栏。服务契约和 `webFileEditors` 名称是 DSH core 调用的扩展缝，因此 editor 插件不需要关心当前处于哪种模式。
 
-已知限制：兼容模式下面板是固定 overlay，不是可拖拽原生列。原生 `shell.editor` 路径可以在不改 editor API 的情况下消除该限制。
+已知限制：兼容模式下面板是 overlay，不是原生 grid 列。它带有左侧拖拽 handle（720-1100px，窄视口下自动收窄），并支持 `方向键左/右` 和 `Home`/`End` 键盘调整；原生 `shell.editor` 路径可以在不改 editor API 的情况下消除该结构限制。
 
 ## DeepSeek Harness core 扩展点
 

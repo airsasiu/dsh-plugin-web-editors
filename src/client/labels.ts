@@ -6,6 +6,7 @@
 export interface EditorLabels {
   dockTitle: string
   closeDock: string
+  resizeDock: string
   files: string
   empty: string
   noEditor: string
@@ -17,6 +18,7 @@ export interface EditorLabels {
 const EN: EditorLabels = {
   dockTitle: 'Files',
   closeDock: 'Close file panel',
+  resizeDock: 'Resize file panel',
   files: 'Open files',
   empty: 'No open file',
   noEditor: 'No editor registered for this file',
@@ -28,6 +30,7 @@ const EN: EditorLabels = {
 const ZH: EditorLabels = {
   dockTitle: '文件',
   closeDock: '关闭文件面板',
+  resizeDock: '调整文件面板宽度',
   files: '已打开文件',
   empty: '暂无打开文件',
   noEditor: '未注册此文件类型的编辑器',

@@ -6,6 +6,7 @@
 // the harness's own client bundles consume it.
 import * as runtime from '@deepseek-ai/dsh-client-runtime/client'
 import type { WebFileEditorStatusTone } from './contract.ts'
+import { OVERLAY_WIDTH_DEFAULT } from './dock-size.ts'
 
 /** One file opened in the dock. */
 export interface OpenedFile {
@@ -22,7 +23,10 @@ export interface EditorPanelState {
   status: string
   statusTone: WebFileEditorStatusTone
   editorRevision: number
+  overlayWidth: number
 }
+
+/** Overlay dock sizing. Native `shell.editor` owns its column width. */
 
 /** Store factory (handle is constructed in apply and shared by dock entries). */
 export const createEditorPanelStore = () => runtime.defineStore({
@@ -34,6 +38,7 @@ export const createEditorPanelStore = () => runtime.defineStore({
     status: '',
     statusTone: 'idle',
     editorRevision: 0,
+    overlayWidth: OVERLAY_WIDTH_DEFAULT,
   }),
   actions: {
     open(state, path: string, root?: string) {
@@ -82,6 +87,9 @@ export const createEditorPanelStore = () => runtime.defineStore({
     setStatus(state, status: string, tone: WebFileEditorStatusTone = 'idle') {
       state.status = status
       state.statusTone = tone
+    },
+    setOverlayWidth(state, width: number) {
+      state.overlayWidth = width
     },
     bumpEditors(state) {
       state.editorRevision += 1

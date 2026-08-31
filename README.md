@@ -92,7 +92,11 @@ When the running shell declares `shell.editor`, this package registers the edito
 
 When `shell.editor` is absent, the same panel registers into `shell.overlay` as a full-height docked right column. The service contract and `webFileEditors` name are the extension seam DSH core calls, so editor plugins do not care which mode is active.
 
-Known limitation: in the compatibility mode the panel is a fixed overlay, not a resizable native column. The native `shell.editor` path removes that limitation without changing the editor API.
+Known limitation: in compatibility mode the panel is a full-height overlay, not
+a native grid column. It has a left-edge drag handle (720-1100px, clamped to
+narrow viewports) and keyboard resizing with `Arrow Left`/`Arrow Right` and
+`Home`/`End`; the native `shell.editor` path removes the structural limitation
+without changing the editor API.
 
 ## DeepSeek Harness core extension points
 
