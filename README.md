@@ -1,5 +1,7 @@
 # dsh-plugin-web-editors
 
+[中文 README](README.zh-CN.md)
+
 A generic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI plugin that turns registered file editors into a single docked editor panel.
 
 The package is plugin-only and safe to mount on a stock DSH Web profile. It uses

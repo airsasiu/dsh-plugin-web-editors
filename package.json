@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/dsh-plugin-web-editors.git"
+    "url": "https://github.com/airsasiu/dsh-plugin-web-editors.git"
   },
   "type": "module",
   "main": "lib/index.js",
@@ -33,7 +33,8 @@
   "files": [
     "lib",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "README.zh-CN.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
