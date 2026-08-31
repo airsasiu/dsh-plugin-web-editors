@@ -112,8 +112,8 @@ export function apply(ctx: Context, config: Config = {}): void {
     order: 90,
     store,
     inject: () => ({
-      openPicker: () => {
-        panelActions?.setPickerOpen(true)
+      openPicker: (root?: string) => {
+        panelActions?.setPickerOpen(true, root)
       },
       label: labels.openFile,
     }),

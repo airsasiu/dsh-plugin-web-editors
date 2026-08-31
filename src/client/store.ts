@@ -18,6 +18,7 @@ export interface OpenedFile {
 export interface EditorPanelState {
   open: boolean
   pickerOpen: boolean
+  pickerRoot: string | undefined
   files: OpenedFile[]
   activePath: string | undefined
   activeRoot: string | undefined
@@ -34,6 +35,7 @@ export const createEditorPanelStore = () => runtime.defineStore({
   init: (): EditorPanelState => ({
     open: false,
     pickerOpen: false,
+    pickerRoot: undefined,
     files: [],
     activePath: undefined,
     activeRoot: undefined,
@@ -96,8 +98,9 @@ export const createEditorPanelStore = () => runtime.defineStore({
       state.status = status
       state.statusTone = tone
     },
-    setPickerOpen(state, pickerOpen: boolean) {
+    setPickerOpen(state, pickerOpen: boolean, root?: string) {
       state.pickerOpen = pickerOpen
+      if (root !== undefined && root !== '') state.pickerRoot = root
       if (pickerOpen) {
         state.open = true
         state.status = ''

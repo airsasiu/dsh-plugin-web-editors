@@ -54,6 +54,7 @@ export function EditorPanel({
   const editorRevision = useStore(state => state.editorRevision)
   const overlayWidth = useStore(state => state.overlayWidth)
   const pickerOpen = useStore(state => state.pickerOpen)
+  const pickerRoot = useStore(state => state.pickerRoot)
   const [resizing, setResizing] = useState(false)
   const [pickerQuery, setPickerQuery] = useState('')
   const [pickerEntries, setPickerEntries] = useState<WebFileEntry[]>([])
@@ -73,7 +74,7 @@ export function EditorPanel({
     let alive = true
     setPickerLoading(true)
     setPickerError('')
-    void fetch(buildFileListUrl(activeRoot, supportedExtensions()))
+    void fetch(buildFileListUrl(pickerRoot ?? activeRoot, supportedExtensions()))
       .then(async response => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data = await response.json() as { files?: WebFileEntry[] }
@@ -88,7 +89,7 @@ export function EditorPanel({
     return () => {
       alive = false
     }
-  }, [activeRoot, pickerOpen, supportedExtensions])
+  }, [activeRoot, pickerOpen, pickerRoot, supportedExtensions])
 
   const applyWidthFromPointer = useCallback((clientX: number): void => {
     if (typeof window === 'undefined') return
@@ -150,7 +151,7 @@ export function EditorPanel({
   const closePicker = (): void => actions.setPickerOpen(false)
 
   const pickFile = (file: WebFileEntry): void => {
-    actions.open(file.path, activeRoot)
+    actions.open(file.path, pickerRoot ?? activeRoot)
   }
 
   const hasSupportedExtensions = supportedExtensions().length > 0

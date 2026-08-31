@@ -108,8 +108,8 @@ npm run build       # tsdown -> lib/index.js + lib/client.js
 
 - 左边缘拖拽 handle，桌面宽度 720-1100px，窄视口自动收窄。
 - `方向键左/右` 和 `Home`/`End` 键盘调整。
-- 会话标题栏的 `Open file` 按钮：注册 editor 后出现，直接打开面板和选择器，不需要先有 produced-file chip。
-- `打开文件` 选择器：扫描当前 root（没有 root 时用进程 cwd），跳过 `.git` 和 `node_modules`，只过滤出已安装 editor 注册的扩展名。
+- 会话标题栏的 `Open file` 按钮：注册 editor 后出现，直接打开面板和选择器，并使用当前会话 cwd，不需要先有 produced-file chip。
+- `打开文件` 选择器：扫描当前会话 cwd（或最近打开文件的 root），跳过 `.git` 和 `node_modules`，只过滤出已安装 editor 注册的扩展名。
 - 宽度保存在面板 store 中，切换文件后保持不变。
 
 `webFileEditors` 和 produced-file 行都由本包提供，因此 editor 插件不需要关心面板是 overlay 还是未来某个原生 shell slot。

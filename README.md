@@ -108,8 +108,8 @@ No DSH core change is required. The editor panel registers into `shell.overlay` 
 
 - A left-edge drag handle, desktop range 720-1100px, clamped to narrow viewports.
 - Keyboard resizing with `Arrow Left`/`Arrow Right` and `Home`/`End`.
-- A session-header `Open file` button that appears once an editor registers and opens the panel with the picker directly, so no produced-file chip is required to start browsing.
-- An `Open file` picker that scans the current root (or the process cwd when no root is known), skips `.git` and `node_modules`, and filters to the extensions registered by installed editors.
+- A session-header `Open file` button that appears once an editor registers and opens the panel with the picker directly, using the current session cwd, so no produced-file chip is required to start browsing.
+- An `Open file` picker that scans the current session cwd (or the last opened file's root), skips `.git` and `node_modules`, and filters to the extensions registered by installed editors.
 - A width kept in the panel store across file switches.
 
 `webFileEditors` and the produced-file row are provided by this package, so editor plugins do not need to know whether the panel is an overlay or a future native shell slot.
