@@ -22,7 +22,12 @@ import { selectChatFiles } from './chat.ts'
 import type { WebFileEditors } from './contract.ts'
 import { browserLocale, labelsFor } from './labels.ts'
 import { createEditorRegistry } from './registry.ts'
-import { createEditorPanelStore, type EditorPanelStoreHandle } from './store.ts'
+import {
+  createEditorPanelStore,
+  createEditorTriggerStore,
+  type EditorPanelStoreHandle,
+  type EditorTriggerStoreHandle,
+} from './store.ts'
 import { injectStyles } from './styles.ts'
 
 export const name = 'dsh-plugin-web-editors'
@@ -39,19 +44,26 @@ export const inject = ['slots']
 export function apply(ctx: Context, config: Config = {}): void {
   const preferOverlay = config.preferOverlay === true
   const store = createEditorPanelStore()
+  const triggerStore = createEditorTriggerStore()
   const registry = createEditorRegistry()
   const labels = labelsFor(browserLocale())
   let panelActions: BoundActions<EditorPanelStoreHandle> | undefined
+  let triggerActions: BoundActions<EditorTriggerStoreHandle> | undefined
   let nativeActive = false
   const pendingOpens: Array<{ path: string; root?: string }> = []
+
+  const notifyEditorsChanged = (): void => {
+    panelActions?.bumpEditors()
+    triggerActions?.setEditorCount(registry.size)
+  }
 
   const service: WebFileEditors = {
     register(editor) {
       const disposer = registry.register(editor)
-      panelActions?.bumpEditors()
+      notifyEditorsChanged()
       return () => {
         disposer()
-        panelActions?.bumpEditors()
+        notifyEditorsChanged()
       }
     },
     tryOpen(request) {
@@ -71,6 +83,7 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   const panelInject = (actions: BoundActions<EditorPanelStoreHandle>, mode: 'native' | 'overlay') => {
     panelActions = actions
+    actions.bumpEditors()
     for (const request of pendingOpens) actions.open(request.path, request.root)
     pendingOpens.length = 0
     return {
@@ -110,13 +123,17 @@ export function apply(ctx: Context, config: Config = {}): void {
     name: 'conversation.session.header.actions',
     id: 'web-editors.open',
     order: 90,
-    store,
-    inject: () => ({
-      openPicker: (root?: string) => {
-        panelActions?.setPickerOpen(true, root)
-      },
-      label: labels.openFile,
-    }),
+    store: triggerStore,
+    inject: (_sessionId, actions: BoundActions<EditorTriggerStoreHandle>) => {
+      triggerActions = actions
+      actions.setEditorCount(registry.size)
+      return {
+        openPicker: (root?: string) => {
+          panelActions?.setPickerOpen(true, root)
+        },
+        label: labels.openFile,
+      }
+    },
   }, OpenFilesTrigger))
 
   // Claim the chain before ui-deliverables' generic row when this plugin can

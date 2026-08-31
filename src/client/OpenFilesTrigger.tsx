@@ -11,7 +11,7 @@ import type {
   PropsStore,
   StandardPropsOf,
 } from '@deepseek-ai/dsh-client-ui-slots'
-import type { EditorPanelStoreHandle } from './store.ts'
+import type { EditorTriggerStoreHandle } from './store.ts'
 
 interface OpenFilesTriggerInjected {
   openPicker(root?: string): void
@@ -19,7 +19,7 @@ interface OpenFilesTriggerInjected {
 }
 
 export type OpenFilesTriggerProps =
-  & PropsStore<EditorPanelStoreHandle>
+  & PropsStore<EditorTriggerStoreHandle>
   & StandardPropsOf<'conversation.session.header.actions'>
   & InjectFace<OpenFilesTriggerInjected>
 
@@ -30,11 +30,11 @@ export function OpenFilesTrigger({
   openPicker,
   label,
 }: OpenFilesTriggerProps): React.JSX.Element | null {
-  const editorRevision = useStore(state => state.editorRevision)
+  const editorCount = useStore(state => state.editorCount)
   const cwd = useSessions(state => sessionId === undefined
     ? undefined
     : state.byId[sessionId]?.cwd)
-  if (editorRevision === 0) return null
+  if (editorCount === 0) return null
 
   return (
     <button

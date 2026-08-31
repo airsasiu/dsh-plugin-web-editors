@@ -28,6 +28,11 @@ export interface EditorPanelState {
   overlayWidth: number
 }
 
+/** Session-scoped state for the always-visible header entry. */
+export interface EditorTriggerState {
+  editorCount: number
+}
+
 /** Overlay dock sizing. Native `shell.editor` owns its column width. */
 
 /** Store factory (handle is constructed in apply and shared by dock entries). */
@@ -116,4 +121,17 @@ export const createEditorPanelStore = () => runtime.defineStore({
   },
 })
 
+/** Store factory for session-scoped header actions. */
+export const createEditorTriggerStore = () => runtime.defineStore({
+  init: (): EditorTriggerState => ({
+    editorCount: 0,
+  }),
+  actions: {
+    setEditorCount(state, editorCount: number) {
+      state.editorCount = editorCount
+    },
+  },
+})
+
 export type EditorPanelStoreHandle = ReturnType<typeof createEditorPanelStore>
+export type EditorTriggerStoreHandle = ReturnType<typeof createEditorTriggerStore>
