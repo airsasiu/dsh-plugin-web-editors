@@ -17,6 +17,7 @@ export interface OpenedFile {
 /** Root-scoped view state shared by the dock entries. */
 export interface EditorPanelState {
   open: boolean
+  pickerOpen: boolean
   files: OpenedFile[]
   activePath: string | undefined
   activeRoot: string | undefined
@@ -32,6 +33,7 @@ export interface EditorPanelState {
 export const createEditorPanelStore = () => runtime.defineStore({
   init: (): EditorPanelState => ({
     open: false,
+    pickerOpen: false,
     files: [],
     activePath: undefined,
     activeRoot: undefined,
@@ -50,6 +52,7 @@ export const createEditorPanelStore = () => runtime.defineStore({
       state.activePath = path
       state.activeRoot = root ?? existing?.root
       state.open = true
+      state.pickerOpen = false
       state.status = ''
       state.statusTone = 'idle'
     },
@@ -58,16 +61,19 @@ export const createEditorPanelStore = () => runtime.defineStore({
       if (file === undefined) return
       state.activePath = file.path
       state.activeRoot = file.root
+      state.pickerOpen = false
       state.status = ''
       state.statusTone = 'idle'
     },
     close(state) {
       state.open = false
+      state.pickerOpen = false
     },
     closeActive(state) {
       const closing = state.activePath
       if (closing === undefined) {
         state.open = false
+        state.pickerOpen = false
         return
       }
       const remaining = state.files.filter(file => file.path !== closing)
@@ -76,17 +82,27 @@ export const createEditorPanelStore = () => runtime.defineStore({
         state.activePath = undefined
         state.activeRoot = undefined
         state.open = false
+        state.pickerOpen = false
         return
       }
       const next = remaining.at(-1)
       state.activePath = next?.path
       state.activeRoot = next?.root
+      state.pickerOpen = false
       state.status = ''
       state.statusTone = 'idle'
     },
     setStatus(state, status: string, tone: WebFileEditorStatusTone = 'idle') {
       state.status = status
       state.statusTone = tone
+    },
+    setPickerOpen(state, pickerOpen: boolean) {
+      state.pickerOpen = pickerOpen
+      if (pickerOpen) {
+        state.open = true
+        state.status = ''
+        state.statusTone = 'idle'
+      }
     },
     setOverlayWidth(state, width: number) {
       state.overlayWidth = width

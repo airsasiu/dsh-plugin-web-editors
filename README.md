@@ -9,6 +9,7 @@ It provides:
 - `webFileEditors`, the client service used by editor plugins and the editor panel.
 - A full-height right panel through `shell.overlay`, with a resizable drag handle.
 - A file picker that scans the workspace root and lists only extensions owned by a registered editor, so users can open existing files without waiting for a chat-produced file link.
+- An always-visible `Open file` button in the session header when at least one editor is registered; it opens the panel and picker directly.
 - A `conversation.chat.turnTail` row for produced files whose extension has a registered editor. Unsupported produced files still use the chat-provided `openFile`, so the official deliverables behavior is preserved.
 
 The generic framework contains no SpreadJS/GrapeCity code. Editor plugins (for example `dsh-plugin-spreadjs-editor`) register their own components through `webFileEditors`.
@@ -53,6 +54,7 @@ interface WebFileEditors {
 | Client service | `webFileEditors` | Editor registry and panel opener |
 | Slot | `shell.overlay`, id `web-editors.dock` | Default docked right panel, order 110 |
 | Slot | `shell.editor` | Optional native right panel when a future shell declares it |
+| Slot | `conversation.session.header.actions`, id `web-editors.open` | Session-header trigger that opens panel and picker |
 | Slot | `conversation.chat.turnTail`, priority -10 | Produced-file row for editor-supported files |
 
 The turn-tail selector reads the official deliverables turn data (`owner.turn.data.get('deliverables')`, shape `{ produced: Array<{ seq, path }> }`) when available and declines otherwise. It claims a turn only when at least one produced file has a registered editor. When it claims a turn, it renders every produced file: supported chips open the editor panel, unsupported chips call the chat-provided `openFile`.
@@ -106,6 +108,7 @@ No DSH core change is required. The editor panel registers into `shell.overlay` 
 
 - A left-edge drag handle, desktop range 720-1100px, clamped to narrow viewports.
 - Keyboard resizing with `Arrow Left`/`Arrow Right` and `Home`/`End`.
+- A session-header `Open file` button that appears once an editor registers and opens the panel with the picker directly, so no produced-file chip is required to start browsing.
 - An `Open file` picker that scans the current root (or the process cwd when no root is known), skips `.git` and `node_modules`, and filters to the extensions registered by installed editors.
 - A width kept in the panel store across file switches.
 

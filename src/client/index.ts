@@ -5,6 +5,7 @@
  *  - `webFileEditors` service — editor registry plus panel opener;
  *  - `shell.editor`           — native right panel when DSH exposes it;
  *  - `shell.overlay`          — docked right-panel fallback for older DSH;
+ *  - `conversation.session.header.actions` — always-visible picker trigger;
  *  - `conversation.chat.turnTail` — produced-file row for supported extensions.
  *
  * Slot types come from the published harness packages; at runtime only react
@@ -16,6 +17,7 @@ import type { TurnTailOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation
 import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
 import { ChatLinks } from './ChatLinks.tsx'
 import { EditorPanel } from './Panel.tsx'
+import { OpenFilesTrigger } from './OpenFilesTrigger.tsx'
 import { selectChatFiles } from './chat.ts'
 import type { WebFileEditors } from './contract.ts'
 import { browserLocale, labelsFor } from './labels.ts'
@@ -101,6 +103,21 @@ export function apply(ctx: Context, config: Config = {}): void {
     store,
     inject: (actions: BoundActions<EditorPanelStoreHandle>) => panelInject(actions, 'overlay'),
   }, EditorPanel))
+
+  // Always-visible entry point: opens the panel and file picker even when no
+  // produced-file chip exists. It appears once an editor registers.
+  ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
+    name: 'conversation.session.header.actions',
+    id: 'web-editors.open',
+    order: 90,
+    store,
+    inject: () => ({
+      openPicker: () => {
+        panelActions?.setPickerOpen(true)
+      },
+      label: labels.openFile,
+    }),
+  }, OpenFilesTrigger))
 
   // Claim the chain before ui-deliverables' generic row when this plugin can
   // open at least one file; unsupported files still route through openFile.

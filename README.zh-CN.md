@@ -9,6 +9,7 @@
 - `webFileEditors`：editor 插件和 editor 面板使用的客户端服务。
 - 通过 `shell.overlay` 渲染的全高右侧面板，带可拖拽宽度 handle。
 - 文件选择器：扫描 workspace root，只列出已注册 editor 支持的扩展名，用户可以直接打开已有文件，不需要等 chat 产物链接。
+- 会话标题栏右侧的 `Open file` 按钮：只要注册了至少一个 editor 就显示，可直接打开面板和文件选择器。
 - `conversation.chat.turnTail` 行：为扩展名已注册 editor 的 produced files 显示文件入口。未支持的文件仍调用 chat 提供的 `openFile`，保留官方 deliverables 行为。
 
 通用框架不包含任何 SpreadJS/GrapeCity 代码。具体编辑器插件（例如 `dsh-plugin-spreadjs-editor`）通过 `webFileEditors` 注册自己的组件。
@@ -53,6 +54,7 @@ interface WebFileEditors {
 | 客户端服务 | `webFileEditors` | editor 注册表与面板打开器 |
 | Slot | `shell.overlay`, id `web-editors.dock` | 默认右侧停靠面板，order 110 |
 | Slot | `shell.editor` | 未来 shell 声明时的可选原生右侧面板 |
+| Slot | `conversation.session.header.actions`, id `web-editors.open` | 会话标题栏入口，直接打开面板和选择器 |
 | Slot | `conversation.chat.turnTail`, priority -10 | editor 支持文件的 produced-file 行 |
 
 turn-tail selector 读取官方 deliverables 数据（`owner.turn.data.get('deliverables')`，结构为 `{ produced: Array<{ seq, path }> }`），没有数据时直接放弃。只有至少一个 produced file 有已注册 editor 时才 claim turn；claim 后会渲染所有 produced file：支持的文件 chip 打开 editor 面板，不支持的 chip 调用 chat 提供的 `openFile`。
@@ -106,6 +108,7 @@ npm run build       # tsdown -> lib/index.js + lib/client.js
 
 - 左边缘拖拽 handle，桌面宽度 720-1100px，窄视口自动收窄。
 - `方向键左/右` 和 `Home`/`End` 键盘调整。
+- 会话标题栏的 `Open file` 按钮：注册 editor 后出现，直接打开面板和选择器，不需要先有 produced-file chip。
 - `打开文件` 选择器：扫描当前 root（没有 root 时用进程 cwd），跳过 `.git` 和 `node_modules`，只过滤出已安装 editor 注册的扩展名。
 - 宽度保存在面板 store 中，切换文件后保持不变。
 

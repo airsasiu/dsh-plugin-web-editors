@@ -270,6 +270,27 @@
   opacity: 0.45;
 }
 
+.dsh-we-trigger {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-border, #c9cdd4);
+  border-radius: 6px;
+  background: var(--dsw-bg, #ffffff);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dsh-we-trigger:hover,
+.dsh-we-trigger:focus-visible {
+  background: var(--dsw-bg-hover, #eef0f3);
+}
+
 .dsh-we-picker-backdrop {
   position: absolute;
   inset: 0;
@@ -479,6 +500,20 @@
     background: #2748b8;
     border-color: #3b6ef6;
     color: #ffffff;
+  }
+
+  .dsh-we-open-btn:disabled {
+    opacity: 0.35;
+  }
+
+  .dsh-we-trigger {
+    background: #262b32;
+    border-color: #3a414a;
+  }
+
+  .dsh-we-trigger:hover,
+  .dsh-we-trigger:focus-visible {
+    background: #2c3138;
   }
 
   .dsh-we-picker-backdrop {

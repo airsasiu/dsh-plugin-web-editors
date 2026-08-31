@@ -53,12 +53,20 @@ export function EditorPanel({
   const statusTone = useStore(state => state.statusTone)
   const editorRevision = useStore(state => state.editorRevision)
   const overlayWidth = useStore(state => state.overlayWidth)
+  const pickerOpen = useStore(state => state.pickerOpen)
   const [resizing, setResizing] = useState(false)
-  const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerQuery, setPickerQuery] = useState('')
   const [pickerEntries, setPickerEntries] = useState<WebFileEntry[]>([])
   const [pickerLoading, setPickerLoading] = useState(false)
   const [pickerError, setPickerError] = useState('')
+
+  useEffect(() => {
+    if (pickerOpen) {
+      setPickerQuery('')
+      setPickerEntries([])
+      setPickerError('')
+    }
+  }, [pickerOpen])
 
   useEffect(() => {
     if (!pickerOpen || supportedExtensions().length === 0) return
@@ -136,17 +144,13 @@ export function EditorPanel({
   }
 
   const openPicker = (): void => {
-    setPickerQuery('')
-    setPickerEntries([])
-    setPickerError('')
-    setPickerOpen(true)
+    actions.setPickerOpen(true)
   }
 
-  const closePicker = (): void => setPickerOpen(false)
+  const closePicker = (): void => actions.setPickerOpen(false)
 
   const pickFile = (file: WebFileEntry): void => {
     actions.open(file.path, activeRoot)
-    setPickerOpen(false)
   }
 
   const hasSupportedExtensions = supportedExtensions().length > 0
