@@ -57,6 +57,24 @@ interface WebFileEditors {
 
 The turn-tail selector reads the official deliverables turn data (`owner.turn.data.get('deliverables')`, shape `{ produced: Array<{ seq, path }> }`) when available and declines otherwise. It claims a turn only when at least one produced file has a registered editor. When it claims a turn, it renders every produced file: supported chips open the editor panel, unsupported chips call the chat-provided `openFile`.
 
+## Configuration
+
+The bundle row accepts one client option, overridable in the profile's
+`cordis.patch.yml`:
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `preferOverlay` | `false` | Force the plugin-only overlay dock even when the shell declares `shell.editor`. |
+
+```yaml
+- id: web-editors
+  config:
+    preferOverlay: true
+```
+
+The default `auto` behavior registers into `shell.editor` when available and
+falls back to the overlay dock otherwise.
+
 ## Install
 
 From the directory that contains this checkout:

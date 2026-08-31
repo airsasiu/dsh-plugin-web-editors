@@ -55,6 +55,22 @@ interface WebFileEditors {
 
 turn-tail selector 读取官方 deliverables 数据（`owner.turn.data.get('deliverables')`，结构为 `{ produced: Array<{ seq, path }> }`），没有数据时直接放弃。只有至少一个 produced file 有已注册 editor 时才 claim turn；claim 后会渲染所有 produced file：支持的文件 chip 打开 editor 面板，不支持的 chip 调用 chat 提供的 `openFile`。
 
+## 配置
+
+bundle row 接受一个客户端选项，可在 profile 的 `cordis.patch.yml` 中覆盖：
+
+| Key | 默认值 | 说明 |
+| --- | --- | --- |
+| `preferOverlay` | `false` | 即使 shell 声明了 `shell.editor`，也强制使用 plugin-only overlay 停靠面板。 |
+
+```yaml
+- id: web-editors
+  config:
+    preferOverlay: true
+```
+
+默认 `auto` 行为是：可用时注册进 `shell.editor`，否则回退到 overlay 停靠面板。
+
 ## 安装
 
 在包含本 checkout 的目录中执行：

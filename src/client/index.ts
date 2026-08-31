@@ -25,10 +25,17 @@ import { injectStyles } from './styles.ts'
 
 export const name = 'dsh-plugin-web-editors'
 
+/** Client plugin config. */
+export interface Config {
+  /** Use the overlay dock even when the shell declares `shell.editor`. */
+  preferOverlay?: boolean
+}
+
 /** Required service: the slot registry (provided by dsh-client-runtime). */
 export const inject = ['slots']
 
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: Config = {}): void {
+  const preferOverlay = config.preferOverlay === true
   const store = createEditorPanelStore()
   const registry = createEditorRegistry()
   const labels = labelsFor(browserLocale())
@@ -72,15 +79,18 @@ export function apply(ctx: Context): void {
     }
   }
 
-  // Native mode: only runs when the running shell declares shell.editor.
-  ctx.slots.inject('shell.editor', () => {
-    nativeActive = true
-    return ctx.slots.register({
-      name: 'shell.editor',
-      store,
-      inject: (actions: BoundActions<EditorPanelStoreHandle>) => panelInject(actions, 'native'),
-    }, EditorPanel)
-  })
+  // Native mode: only runs when the running shell declares shell.editor and
+  // the deployment has not forced the plugin-only overlay dock.
+  if (!preferOverlay) {
+    ctx.slots.inject('shell.editor', () => {
+      nativeActive = true
+      return ctx.slots.register({
+        name: 'shell.editor',
+        store,
+        inject: (actions: BoundActions<EditorPanelStoreHandle>) => panelInject(actions, 'native'),
+      }, EditorPanel)
+    })
+  }
 
   // Compatibility mode: older DSH shells still get the docked overlay panel.
   ctx.slots.inject('shell.overlay', () => ctx.slots.register({
